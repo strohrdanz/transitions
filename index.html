@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Transitions</title>
+    <link rel="stylesheet" href="css/animation.css"/>
+    <link rel="stylesheet" href="css/styles.css"/>
+</head>
+
+<body>
+<ul id="transition-options">
+    <li><span class="current-transition"></span>
+        <ul>
+        	<li class="transition-option" value="54/55">Room to right/left</li>
+            <li class="transition-option" value="56/57">Room to top/bottom</li>
+            <li class="transition-option" value="23/24">Move to right/left, scale up</li>
+            <li class="transition-option" value="22/21">Scale up/scale down</li>
+            <li class="transition-option" value="13/14">Different easing from right/left</li>
+            <li class="transition-option" value="1/2">Slide right/left</li>
+            <li class="transition-option" value="28/29">Glue from right/left</li>
+            <li class="transition-option" value="8/7">Fade top/bottom</li>
+            <li class="transition-option" value="49/48">Fold top/bottom</li>
+        </ul>
+    </li>
+</ul>
+
+<div class="pt-wrapper">
+    <div class="pt-trigger-container">
+        <button class="pt-trigger next" data-goto="-1">&gt;</button>
+        <button class="pt-trigger prev" data-goto="-2">&lt;</button>
+        <button class="pt-trigger prevpreview" data-goto="-1"><img src="img/7thumb.jpg"></button>
+        <button class="pt-trigger nextpreview" data-goto="-2"><img src="img/2thumb.jpg"></button>
+    </div>
+    <div class="pt-page pt-page-1">
+	</div>
+    <div class="pt-page pt-page-2">
+    </div>
+    <div class="pt-page pt-page-3">
+    </div>
+    <div class="pt-page pt-page-4">
+    </div>`
+    <div class="pt-page pt-page-5">
+    </div>
+    <div class="pt-page pt-page-6">
+    </div>
+    <div class="pt-page pt-page-7">
+    </div>
+
+    <div class="filmstrip clearfix"></div>
+
+</div>
+
+<div class="pt-message">
+    <p>Your browser does not support CSS animations.</p>
+</div>
+<script src="js/jquery-1.9.1.min.js"></script>
+<script src="js/transition.js"></script>
+
+</body>
+</html>
