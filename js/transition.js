@@ -93,22 +93,22 @@ var PageTransitions = (function () {
             Animate($pageTrigger);
         });
 
-                if (screen.width <= 980) {
+        if (screen.width <= 980) {
 
-                    $.getScript("js/jquery.mobile-events.js")
-                      .done(function() {
-                         $('.pt-wrapper').swiperight(function(){
-                            $pageTrigger = $(this).children().children('button').eq(1);
-                            console.log($pageTrigger);
-                            Animate($pageTrigger);        
-                        });
+            $.getScript("js/jquery.mobile-events.js")
+              .done(function() {
+                 $('.pt-wrapper').swiperight(function(){
+                    $pageTrigger = $(this).children().children('button').eq(1);
+                    console.log($pageTrigger);
+                    Animate($pageTrigger);        
+                });
 
-                        $('.pt-wrapper').swipeleft(function(){
-                            $pageTrigger = $(this).children().children('button').eq(0);
-                            console.log($pageTrigger);
-                            Animate($pageTrigger);      
-                        });
-                      });
+                $('.pt-wrapper').swipeleft(function(){
+                    $pageTrigger = $(this).children().children('button').eq(0);
+                    console.log($pageTrigger);
+                    Animate($pageTrigger);      
+                });
+              });
             }
         }
 
