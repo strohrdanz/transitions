@@ -26,10 +26,19 @@
 
 <div class="pt-wrapper">
     <div class="pt-trigger-container">
-        <button class="pt-trigger next" data-goto="-1">&gt;</button>
-        <button class="pt-trigger prev" data-goto="-2">&lt;</button>
-        <button class="pt-trigger prevpreview" data-goto="-1"><img src="img/7thumb.jpg"></button>
-        <button class="pt-trigger nextpreview" data-goto="-2"><img src="img/2thumb.jpg"></button>
+        <div class="next-container">
+            <div class="next-cube">
+                <button class="pt-trigger next front" data-goto="-1">&gt;</button>
+                <button class="pt-trigger nextpreview side" data-goto="-1"><img src="img/2thumb.jpg"></button>
+            </div>
+        </div>
+        <div class="previous-container">
+            <div class="previous-cube">
+                <button class="pt-trigger prev front" data-goto="-2">&lt;</button>
+                <button class="pt-trigger prevpreview side" data-goto="-2"><img src="img/7thumb.jpg"></button>
+            </div>
+        </div>
+
     </div>
     <div class="pt-page pt-page-1">
 	</div>

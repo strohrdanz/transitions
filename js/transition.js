@@ -524,8 +524,10 @@ var PageTransitions = (function () {
             var prevPicture = pagesCount;
         }
 
-        $(".prevpreview").html('<img src="img/' + prevPicture + 'thumb.jpg">');
-        $(".nextpreview").html('<img src="img/' + nextPicture + 'thumb.jpg">');
+        setTimeout(function(){
+          $(".prevpreview").html('<img src="img/' + prevPicture + 'thumb.jpg">');
+            $(".nextpreview").html('<img src="img/' + nextPicture + 'thumb.jpg">');
+        }, 400);
 
          $('.thumb').removeClass('active-thumb');
 

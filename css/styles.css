@@ -126,7 +126,7 @@ ul li:hover ul {
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: 99;
+    z-index: 100;
     left: 50%;
     margin-top: 75px;
     -webkit-transform: translateX(-50%);
@@ -135,7 +135,7 @@ ul li:hover ul {
     transform: translateX(-50%);
 }
 
-.next, .prev {
+/*.next, .prev {
     z-index: 100;
     background: #333;
     color: #ababab;
@@ -208,6 +208,86 @@ ul li:hover ul {
   left: 48px;  
   opacity: 1;
 }
+*/
+/* Flip out previews */
+
+.pt-trigger {
+  outline: none;
+  border: none;
+  cursor: pointer;
+  background: none;
+}
+
+.next-container, .previous-container {
+  position: absolute;
+  top: 30%;
+    -webkit-perspective: 800;
+    -webkit-perspective-origin: 50% 70px;
+    -moz-perspective: 800;
+    -moz-perspective-origin: 50% 70px;
+}
+
+.next-container {
+  right: 0;
+}
+
+.previous-container {
+  left: 0;
+}
+
+.next, .prev {
+    position: absolute;
+    height: 70px;
+    width: 70px;
+    font-size: 27px;
+    line-height: 1em;
+    color: #fff;
+}
+
+.next-cube, .previous-cube {
+    position: relative;
+    height: 70px;
+    width: 70px;
+    -webkit-transition: -webkit-transform .5s linear;
+    -webkit-transform-style: preserve-3d;
+    -moz-transition: -moz-transform .5s linear;
+    -moz-transform-style: preserve-3d;
+}
+
+.next-cube .front, .previous-cube .front {
+    -webkit-transform: translateZ(35px);
+    -moz-transform: translateZ(35px);
+    background-color: #888;
+}
+
+.next-cube .side {
+    -webkit-transform: rotateY(-90deg) translateZ(35px);
+    -moz-transform: rotateY(-90deg) translateZ(35px);
+    background: none;
+}
+
+.next-cube:hover {
+    -webkit-transform:rotateY(90deg);     
+}
+
+.previous-cube .side {
+    -webkit-transform: rotateY(90deg) translateZ(35px);
+    -moz-transform: rotateY(90deg) translateZ(35px);
+}
+
+.previous-cube:hover {
+    -webkit-transform:rotateY(-90deg);     
+}
+
+.nextpreview, .prevpreview {
+  margin: 0;
+  padding: 0;
+}
+
+.nextpreview img, .prevpreview img {
+  width: 100%;
+}
+
 
 /* Page Styles */
 .pt-page-ontop {
@@ -340,8 +420,6 @@ ul li:hover ul {
 .no-cssanimations .pt-message {
     display: block;
 }
-
-/* Flip out previews */
 
 @media screen and (max-width: 980px) {
 
