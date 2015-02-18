@@ -6,557 +6,641 @@
 
 var PageTransitions = (function () {
 
-    var startPageIndex = 0,
-        animEndEventNames = {
-            'WebkitAnimation'   : 'webkitAnimationEnd',
-            'OAnimation'        : 'oAnimationEnd',
-            'msAnimation'       : 'MSAnimationEnd',
-            'animation'         : 'animationend'
-        },
+	var startPageIndex = 0,
+		animEndEventNames = {
+			'WebkitAnimation'   : 'webkitAnimationEnd',
+			'OAnimation'        : 'oAnimationEnd',
+			'msAnimation'       : 'MSAnimationEnd',
+			'animation'         : 'animationend'
+		},
 
-        // animation end event name
-        animEndEventName = animEndEventNames[Modernizr.prefixed('animation')],
+		// animation end event name
+		animEndEventName = animEndEventNames[Modernizr.prefixed('animation')],
 
-        // support css animations
-        support = Modernizr.cssanimations;
+		// support css animations
+		support = Modernizr.cssanimations;
 
-    function init() {
+	function init() {
 
-        var total = $('.pt-page').length;
+		var total = $('.pt-page').length;
 
-        var prevPicture = total;
-        var nextPicture = 2;
+		var prevPicture = total;
+		var nextPicture = 2;
 
-        nextAnimationNumber = $('.next').attr('data-animation');
+		nextAnimationNumber = $('.next').attr('data-animation');
 
-        prevAnimationNumber = $('.prev').attr('data-animation');
+		prevAnimationNumber = $('.prev').attr('data-animation');
 
-        var firstValue = localStorage.getItem("firstValue");
-        var secondValue = localStorage.getItem("secondValue");
-        var transitionName = localStorage.getItem("transitionName");
+		var firstValue = localStorage.getItem("firstValue");
+		var secondValue = localStorage.getItem("secondValue");
+		var transitionName = localStorage.getItem("transitionName");
 
-        if (transitionName == null) {
-            var firstValue = 54;
-            var secondValue = 55;
-            var transitionName = "Room to right/left";
-        }
+		if (transitionName == null) {
+			var firstValue = 23;
+			var secondValue = 24;
+			var transitionName = "Move to right/left, scale up";
+		}
 
-        $('.next, .nextpreview').attr('data-animation', firstValue);
-        $('.prev, .prevpreview').attr('data-animation', secondValue);
-        $('.current-transition').text(transitionName);
+		$('.next, .nextpreview').attr('data-animation', firstValue);
+		$('.prev, .prevpreview').attr('data-animation', secondValue);
+		$('.current-transition').text(transitionName);
 
-        $('.transition-option').on('click', function(){
-            var value = $(this).attr('value');
-            var splitValues = value.split('/',2);
-            var firstValue = splitValues[0];
-            var secondValue = splitValues[1];
-            var transitionName = $(this).text();
-            console.log(firstValue);
-            console.log(secondValue);
-            console.log(transitionName);
-            
-            localStorage.setItem("firstValue", firstValue);
-            localStorage.setItem("secondValue", secondValue);
-            localStorage.setItem("transitionName", transitionName);
+		$('.transition-option').on('click', function(){
+			var value = $(this).attr('value');
+			var splitValues = value.split('/',2);
+			var firstValue = splitValues[0];
+			var secondValue = splitValues[1];
+			var transitionName = $(this).text();
+			
+			localStorage.setItem("firstValue", firstValue);
+			localStorage.setItem("secondValue", secondValue);
+			localStorage.setItem("transitionName", transitionName);
 
-            location.reload();
-        });
+			location.reload();
+		});
 
-         // film strip of thumbnails
-        var thumbnails = [];
+		 // film strip of thumbnails
+		var thumbnails = [];
 
-        // Get all the .pt-page div.
-        $('.pt-page').each( function(){
-            var $page = $(this);
-            $page.data('originalClassList', $page.attr('class'));
-            var className = $page.attr('class');
-            var splitName = className.split('-',-2)
-            var picNumber = splitName[3];
-            thumbnails.push(picNumber);
+		// Get all the .pt-page div.
+		$('.pt-page').each( function(){
+			var $page = $(this);
+			$page.data('originalClassList', $page.attr('class'));
+			var className = $page.attr('class');
+			var splitName = className.split('-',-2)
+			var picNumber = splitName[3];
+			thumbnails.push(picNumber);
 
-            $('.filmstrip').append('<div class="thumb thumb' + picNumber + ' pt-trigger" data-goto="' + picNumber + '"" data-animation="' + firstValue + '"><img src="img/' + picNumber + 'thumb.jpg"></div>');
-        });
+			$('.filmstrip').append('<div class="thumb thumb' + picNumber + ' pt-trigger" data-goto="' + picNumber + '"" data-animation="' + firstValue + '"><img src="img/' + picNumber + 'thumb.jpg"></div>');
+		});
 
-        $('.thumb1').addClass('active-thumb');
+		$('.thumb1').addClass('active-thumb');
 
-        // Get all the .pt-wrapper div which is the parent for all pt-div
-        $('.pt-wrapper').each( function() {
-            var $wrapperDiv = $(this);
-            $wrapperDiv.data('current', 0);
-            $wrapperDiv.data('isAnimating', false);
-            $wrapperDiv.children('.pt-page').eq(startPageIndex).addClass('pt-page-current');
-        });
+		// Get all the .pt-wrapper div which is the parent for all pt-div
+		$('.pt-wrapper').each( function() {
+			var $wrapperDiv = $(this);
+			$wrapperDiv.data('current', 0);
+			$wrapperDiv.data('isAnimating', false);
+			$wrapperDiv.children('.pt-page').eq(startPageIndex).addClass('pt-page-current');
+		});
 
-        // Adding click event to .pt-trigger
-        $('.pt-trigger').click(function() {
-            $pageTrigger = $(this);
-            Animate($pageTrigger);
-        });
+		// Adding click event to .pt-trigger
+		$('.pt-trigger').click(function() {
+			$pageTrigger = $(this);
+			Animate($pageTrigger);
+		});
 
-        if (screen.width <= 980) {
+		var indexToPage = startPageIndex + 1;
 
-            $.getScript("js/jquery.mobile-events.js")
-              .done(function() {
-                 $('.pt-wrapper').swiperight(function(){
-                    $pageTrigger = $(this).children().children('button').eq(1);
-                    console.log($pageTrigger);
-                    Animate($pageTrigger);        
-                });
+		descriptionContent = $('.pt-page-' + indexToPage).children('.description').html();
 
-                $('.pt-wrapper').swipeleft(function(){
-                    $pageTrigger = $(this).children().children('button').eq(0);
-                    console.log($pageTrigger);
-                    Animate($pageTrigger);      
-                });
-              });
-            }
-        }
+		if (typeof(descriptionContent) == "undefined") {
+			$('.has-description').removeClass('show');
+			$('.description-button').css('cursor', 'default');
+		} 
+		if (typeof(descriptionContent) != "undefined") {
+			$('.has-description').addClass('show');
+			$('.description-button').css('cursor', 'pointer');
+		}
 
-    // All pt-trigger click event calls this function
-    // This function gets the animation id, goto page that we define in `data-animation` and 'data-goto' repectively.
-    function Animate($pageTrigger) {
+		// check if mobile, add swipe gestures
 
-        // Checking for 'data-animation' and 'data-goto' attributes.
-        if (!($pageTrigger.attr('data-animation'))) {
-            alert("Transition.js : Invalid attribute configuration. \n\n 'data-animation' attribute not found");
-            return false;
-        }
-        else if (!($pageTrigger.attr('data-goto'))) {
-            alert("Transition.js : Invalid attribute configuration. \n\n 'data-goto' attribute not found");
-            return false;
-        }
+		if (screen.width <= 980) {
 
-        var animation = $pageTrigger.data('animation').toString(),
-            gotoPage, inClass, outClass, selectedAnimNumber;
+			$.getScript("js/jquery.mobile-events.js")
+			  .done(function() {
+				 $('.pt-wrapper').swiperight(function(){
+					$pageTrigger = $(this).children().children('button').eq(1);
+					console.log($pageTrigger);
+					Animate($pageTrigger);        
+				});
 
-         // Check if the delimiter '-' is present then create an animation array list.
-        if(animation.indexOf('-') != -1) {
-            var randomAnimList = animation.split('-');
-            selectedAnimNumber = parseInt(randomAnimList[(Math.floor(Math.random() * randomAnimList.length))]);
-        }
-        else {
-            selectedAnimNumber = parseInt(animation);
-        }
+				$('.pt-wrapper').swipeleft(function(){
+					$pageTrigger = $(this).children().children('button').eq(0);
+					console.log($pageTrigger);
+					Animate($pageTrigger);      
+				});
+			  });
+			}
 
-        // Checking if the animation number is out of bound, max allowed value is 1 to 67.
-        if (selectedAnimNumber > 67) {
-            alert("Transition.js : Invalid 'data-animation' attribute configuration. Animation number should not be greater than 67");
-            return false;
-        }
+		}
 
-        switch(selectedAnimNumber) {
-            case 1:
-                inClass = 'pt-page-moveFromRight';
-                outClass = 'pt-page-moveToLeft';
-                break;
-            case 2:
-                inClass = 'pt-page-moveFromLeft';
-                outClass = 'pt-page-moveToRight';
-                break;
-            case 3:
-                inClass = 'pt-page-moveFromBottom';
-                outClass = 'pt-page-moveToTop';
-                break;
-            case 4:
-                inClass = 'pt-page-moveFromTop';
-                outClass = 'pt-page-moveToBottom';
-                break;
-            case 5:
-                inClass = 'pt-page-moveFromRight pt-page-ontop';
-                outClass = 'pt-page-fade';
-                break;
-            case 6:
-                inClass = 'pt-page-moveFromLeft pt-page-ontop';
-                outClass = 'pt-page-fade';
-                break;
-            case 7:
-                inClass = 'pt-page-moveFromBottom pt-page-ontop';
-                outClass = 'pt-page-fade';
-                break;
-            case 8:
-                inClass = 'pt-page-moveFromTop pt-page-ontop';
-                outClass = 'pt-page-fade';
-                break;
-            case 9:
-                inClass = 'pt-page-moveFromRightFade';
-                outClass = 'pt-page-moveToLeftFade';
-                break;
-            case 10:
-                inClass = 'pt-page-moveFromLeftFade';
-                outClass = 'pt-page-moveToRightFade';
-                break;
-            case 11:
-                inClass = 'pt-page-moveFromBottomFade';
-                outClass = 'pt-page-moveToTopFade';
-                break;
-            case 12:
-                inClass = 'pt-page-moveFromTopFade';
-                outClass = 'pt-page-moveToBottomFade';
-                break;
-            case 13:
-                inClass = 'pt-page-moveFromRight';
-                outClass = 'pt-page-moveToLeftEasing pt-page-ontop';
-                break;
-            case 14:
-                inClass = 'pt-page-moveFromLeft';
-                outClass = 'pt-page-moveToRightEasing pt-page-ontop';
-                break;
-            case 15:
-                inClass = 'pt-page-moveFromBottom';
-                outClass = 'pt-page-moveToTopEasing pt-page-ontop';
-                break;
-            case 16:
-                inClass = 'pt-page-moveFromTop';
-                outClass = 'pt-page-moveToBottomEasing pt-page-ontop';
-                break;
-            case 17:
-                inClass = 'pt-page-moveFromRight pt-page-ontop';
-                outClass = 'pt-page-scaleDown';
-                break;
-            case 18:
-                inClass = 'pt-page-moveFromLeft pt-page-ontop';
-                outClass = 'pt-page-scaleDown';
-                break;
-            case 19:
-                inClass = 'pt-page-moveFromBottom pt-page-ontop';
-                outClass = 'pt-page-scaleDown';
-                break;
-            case 20:
-                inClass = 'pt-page-moveFromTop pt-page-ontop';
-                outClass = 'pt-page-scaleDown';
-                break;
-            case 21:
-                inClass = 'pt-page-scaleUpDown pt-page-delay300';
-                outClass = 'pt-page-scaleDown';
-                break;
-            case 22:
-                inClass = 'pt-page-scaleUp pt-page-delay300';
-                outClass = 'pt-page-scaleDownUp';
-                break;
-            case 23:
-                inClass = 'pt-page-scaleUp';
-                outClass = 'pt-page-moveToLeft pt-page-ontop';
-                break;
-            case 24:
-                inClass = 'pt-page-scaleUp';
-                outClass = 'pt-page-moveToRight pt-page-ontop';
-                break;
-            case 25:
-                inClass = 'pt-page-scaleUp';
-                outClass = 'pt-page-moveToTop pt-page-ontop';
-                break;
-            case 26:
-                inClass = 'pt-page-scaleUp';
-                outClass = 'pt-page-moveToBottom pt-page-ontop';
-                break;
-            case 27:
-                inClass = 'pt-page-scaleUpCenter pt-page-delay400';
-                outClass = 'pt-page-scaleDownCenter';
-                break;
-            case 28:
-                inClass = 'pt-page-moveFromRight pt-page-delay200 pt-page-ontop';
-                outClass = 'pt-page-rotateRightSideFirst';
-                break;
-            case 29:
-                inClass = 'pt-page-moveFromLeft pt-page-delay200 pt-page-ontop';
-                outClass = 'pt-page-rotateLeftSideFirst';
-                break;
-            case 30:
-                inClass = 'pt-page-moveFromTop pt-page-delay200 pt-page-ontop';
-                outClass = 'pt-page-rotateTopSideFirst';
-                break;
-            case 31:
-                inClass = 'pt-page-moveFromBottom pt-page-delay200 pt-page-ontop';
-                outClass = 'pt-page-rotateBottomSideFirst';
-                break;
-            case 32:
-                inClass = 'pt-page-flipInLeft pt-page-delay500';
-                outClass = 'pt-page-flipOutRight';
-                break;
-            case 33:
-                inClass = 'pt-page-flipInRight pt-page-delay500';
-                outClass = 'pt-page-flipOutLeft';
-                break;
-            case 34:
-                inClass = 'pt-page-flipInBottom pt-page-delay500';
-                outClass = 'pt-page-flipOutTop';
-                break;
-            case 35:
-                inClass = 'pt-page-flipInTop pt-page-delay500';
-                outClass = 'pt-page-flipOutBottom';
-                break;
-            case 36:
-                inClass = 'pt-page-scaleUp';
-                outClass = 'pt-page-rotateFall pt-page-ontop';
-                break;
-            case 37:
-                inClass = 'pt-page-rotateInNewspaper pt-page-delay500';
-                outClass = 'pt-page-rotateOutNewspaper';
-                break;
-            case 38:
-                inClass = 'pt-page-moveFromRight';
-                outClass = 'pt-page-rotatePushLeft';
-                break;
-            case 39:
-                inClass = 'pt-page-moveFromLeft';
-                outClass = 'pt-page-rotatePushRight';
-                break;
-            case 40:
-                inClass = 'pt-page-moveFromBottom';
-                outClass = 'pt-page-rotatePushTop';
-                break;
-            case 41:
-                inClass = 'pt-page-moveFromTop';
-                outClass = 'pt-page-rotatePushBottom';
-                break;
-            case 42:
-                inClass = 'pt-page-rotatePullRight pt-page-delay180';
-                outClass = 'pt-page-rotatePushLeft';
-                break;
-            case 43:
-                inClass = 'pt-page-rotatePullLeft pt-page-delay180';
-                outClass = 'pt-page-rotatePushRight';
-                break;
-            case 44:
-                inClass = 'pt-page-rotatePullBottom pt-page-delay180';
-                outClass = 'pt-page-rotatePushTop';
-                break;
-            case 45:
-                inClass = 'pt-page-rotatePullTop pt-page-delay180';
-                outClass = 'pt-page-rotatePushBottom';
-                break;
-            case 46:
-                inClass = 'pt-page-moveFromRightFade';
-                outClass = 'pt-page-rotateFoldLeft';
-                break;
-            case 47:
-                inClass = 'pt-page-moveFromLeftFade';
-                outClass = 'pt-page-rotateFoldRight';
-                break;
-            case 48:
-                inClass = 'pt-page-moveFromBottomFade';
-                outClass = 'pt-page-rotateFoldTop';
-                break;
-            case 49:
-                inClass = 'pt-page-moveFromTopFade';
-                outClass = 'pt-page-rotateFoldBottom';
-                break;
-            case 50:
-                inClass = 'pt-page-rotateUnfoldLeft';
-                outClass = 'pt-page-moveToRightFade';
-                break;
-            case 51:
-                inClass = 'pt-page-rotateUnfoldRight';
-                outClass = 'pt-page-moveToLeftFade';
-                break;
-            case 52:
-                inClass = 'pt-page-rotateUnfoldTop';
-                outClass = 'pt-page-moveToBottomFade';
-                break;
-            case 53:
-                inClass = 'pt-page-rotateUnfoldBottom';
-                outClass = 'pt-page-moveToTopFade';
-                break;
-            case 54:
-                inClass = 'pt-page-rotateRoomLeftIn';
-                outClass = 'pt-page-rotateRoomLeftOut pt-page-ontop';
-                break;
-            case 55:
-                inClass = 'pt-page-rotateRoomRightIn';
-                outClass = 'pt-page-rotateRoomRightOut pt-page-ontop';
-                break;
-            case 56:
-                inClass = 'pt-page-rotateRoomTopIn';
-                outClass = 'pt-page-rotateRoomTopOut pt-page-ontop';
-                break;
-            case 57:
-                inClass = 'pt-page-rotateRoomBottomIn';
-                outClass = 'pt-page-rotateRoomBottomOut pt-page-ontop';
-                break;
-            case 58:
-                inClass = 'pt-page-rotateCubeLeftIn';
-                outClass = 'pt-page-rotateCubeLeftOut pt-page-ontop';
-                break;
-            case 59:
-                inClass = 'pt-page-rotateCubeRightIn';
-                outClass = 'pt-page-rotateCubeRightOut pt-page-ontop';
-                break;
-            case 60:
-                inClass = 'pt-page-rotateCubeTopIn';
-                outClass = 'pt-page-rotateCubeTopOut pt-page-ontop';
-                break;
-            case 61:
-                inClass = 'pt-page-rotateCubeBottomIn';
-                outClass = 'pt-page-rotateCubeBottomOut pt-page-ontop';
-                break;
-            case 62:
-                inClass = 'pt-page-rotateCarouselLeftIn';
-                outClass = 'pt-page-rotateCarouselLeftOut pt-page-ontop';
-                break;
-            case 63:
-                inClass = 'pt-page-rotateCarouselRightIn';
-                outClass = 'pt-page-rotateCarouselRightOut pt-page-ontop';
-                break;
-            case 64:
-                inClass = 'pt-page-rotateCarouselTopIn';
-                outClass = 'pt-page-rotateCarouselTopOut pt-page-ontop';
-                break;
-            case 65:
-                inClass = 'pt-page-rotateCarouselBottomIn';
-                outClass = 'pt-page-rotateCarouselBottomOut pt-page-ontop';
-                break;
-            case 66:
-                inClass = 'pt-page-rotateSidesIn pt-page-delay200';
-                outClass = 'pt-page-rotateSidesOut';
-                break;
-            case 67:
-                inClass = 'pt-page-rotateSlideIn';
-                outClass = 'pt-page-rotateSlideOut';
-                break;
-        }
+	// All pt-trigger click event calls this function
+	// This function gets the animation id, goto page that we define in `data-animation` and 'data-goto' repectively.
+	function Animate($pageTrigger) {
 
-        // This will get the pt-trigger elements parent wrapper div
-        var $pageWrapper = $pageTrigger.closest('.pt-wrapper');
-        var currentPageIndex = $pageWrapper.data('current'), tempPageIndex,
-            $pages = $pageWrapper.children('div.pt-page'),
-            pagesCount = $pages.length,
-            endCurrentPage = false,
-            endNextPage = false;
+		// Checking for 'data-animation' and 'data-goto' attributes.
+		if (!($pageTrigger.attr('data-animation'))) {
+			alert("Transition.js : Invalid attribute configuration. \n\n 'data-animation' attribute not found");
+			return false;
+		}
+		else if (!($pageTrigger.attr('data-goto'))) {
+			alert("Transition.js : Invalid attribute configuration. \n\n 'data-goto' attribute not found");
+			return false;
+		}
 
-        gotoPage = parseInt($pageTrigger.data('goto'));
+		var animation = $pageTrigger.data('animation').toString(),
+			gotoPage, inClass, outClass, selectedAnimNumber;
 
-        // check if 'data-goto' value is greater than total pages inside 'pt-wrapper'
-        if (!(pagesCount < gotoPage)) {
-            
-            tempPageIndex = currentPageIndex;
+		 // Check if the delimiter '-' is present then create an animation array list.
+		if(animation.indexOf('-') != -1) {
+			var randomAnimList = animation.split('-');
+			selectedAnimNumber = parseInt(randomAnimList[(Math.floor(Math.random() * randomAnimList.length))]);
+		}
+		else {
+			selectedAnimNumber = parseInt(animation);
+		}
 
-            if($pageWrapper.data('isAnimating')) {
-                return false;
-            }
+		// Checking if the animation number is out of bound, max allowed value is 1 to 67.
+		if (selectedAnimNumber > 67) {
+			alert("Transition.js : Invalid 'data-animation' attribute configuration. Animation number should not be greater than 67");
+			return false;
+		}
 
-            // Setting the isAnimating property to true.
-            $pageWrapper.data('isAnimating', true);
+		switch(selectedAnimNumber) {
+			case 1:
+				inClass = 'pt-page-moveFromRight';
+				outClass = 'pt-page-moveToLeft';
+				break;
+			case 2:
+				inClass = 'pt-page-moveFromLeft';
+				outClass = 'pt-page-moveToRight';
+				break;
+			case 3:
+				inClass = 'pt-page-moveFromBottom';
+				outClass = 'pt-page-moveToTop';
+				break;
+			case 4:
+				inClass = 'pt-page-moveFromTop';
+				outClass = 'pt-page-moveToBottom';
+				break;
+			case 5:
+				inClass = 'pt-page-moveFromRight pt-page-ontop';
+				outClass = 'pt-page-fade';
+				break;
+			case 6:
+				inClass = 'pt-page-moveFromLeft pt-page-ontop';
+				outClass = 'pt-page-fade';
+				break;
+			case 7:
+				inClass = 'pt-page-moveFromBottom pt-page-ontop';
+				outClass = 'pt-page-fade';
+				break;
+			case 8:
+				inClass = 'pt-page-moveFromTop pt-page-ontop';
+				outClass = 'pt-page-fade';
+				break;
+			case 9:
+				inClass = 'pt-page-moveFromRightFade';
+				outClass = 'pt-page-moveToLeftFade';
+				break;
+			case 10:
+				inClass = 'pt-page-moveFromLeftFade';
+				outClass = 'pt-page-moveToRightFade';
+				break;
+			case 11:
+				inClass = 'pt-page-moveFromBottomFade';
+				outClass = 'pt-page-moveToTopFade';
+				break;
+			case 12:
+				inClass = 'pt-page-moveFromTopFade';
+				outClass = 'pt-page-moveToBottomFade';
+				break;
+			case 13:
+				inClass = 'pt-page-moveFromRight';
+				outClass = 'pt-page-moveToLeftEasing pt-page-ontop';
+				break;
+			case 14:
+				inClass = 'pt-page-moveFromLeft';
+				outClass = 'pt-page-moveToRightEasing pt-page-ontop';
+				break;
+			case 15:
+				inClass = 'pt-page-moveFromBottom';
+				outClass = 'pt-page-moveToTopEasing pt-page-ontop';
+				break;
+			case 16:
+				inClass = 'pt-page-moveFromTop';
+				outClass = 'pt-page-moveToBottomEasing pt-page-ontop';
+				break;
+			case 17:
+				inClass = 'pt-page-moveFromRight pt-page-ontop';
+				outClass = 'pt-page-scaleDown';
+				break;
+			case 18:
+				inClass = 'pt-page-moveFromLeft pt-page-ontop';
+				outClass = 'pt-page-scaleDown';
+				break;
+			case 19:
+				inClass = 'pt-page-moveFromBottom pt-page-ontop';
+				outClass = 'pt-page-scaleDown';
+				break;
+			case 20:
+				inClass = 'pt-page-moveFromTop pt-page-ontop';
+				outClass = 'pt-page-scaleDown';
+				break;
+			case 21:
+				inClass = 'pt-page-scaleUpDown pt-page-delay300';
+				outClass = 'pt-page-scaleDown';
+				break;
+			case 22:
+				inClass = 'pt-page-scaleUp pt-page-delay300';
+				outClass = 'pt-page-scaleDownUp';
+				break;
+			case 23:
+				inClass = 'pt-page-scaleUp';
+				outClass = 'pt-page-moveToLeft pt-page-ontop';
+				break;
+			case 24:
+				inClass = 'pt-page-scaleUp';
+				outClass = 'pt-page-moveToRight pt-page-ontop';
+				break;
+			case 25:
+				inClass = 'pt-page-scaleUp';
+				outClass = 'pt-page-moveToTop pt-page-ontop';
+				break;
+			case 26:
+				inClass = 'pt-page-scaleUp';
+				outClass = 'pt-page-moveToBottom pt-page-ontop';
+				break;
+			case 27:
+				inClass = 'pt-page-scaleUpCenter pt-page-delay400';
+				outClass = 'pt-page-scaleDownCenter';
+				break;
+			case 28:
+				inClass = 'pt-page-moveFromRight pt-page-delay200 pt-page-ontop';
+				outClass = 'pt-page-rotateRightSideFirst';
+				break;
+			case 29:
+				inClass = 'pt-page-moveFromLeft pt-page-delay200 pt-page-ontop';
+				outClass = 'pt-page-rotateLeftSideFirst';
+				break;
+			case 30:
+				inClass = 'pt-page-moveFromTop pt-page-delay200 pt-page-ontop';
+				outClass = 'pt-page-rotateTopSideFirst';
+				break;
+			case 31:
+				inClass = 'pt-page-moveFromBottom pt-page-delay200 pt-page-ontop';
+				outClass = 'pt-page-rotateBottomSideFirst';
+				break;
+			case 32:
+				inClass = 'pt-page-flipInLeft pt-page-delay500';
+				outClass = 'pt-page-flipOutRight';
+				break;
+			case 33:
+				inClass = 'pt-page-flipInRight pt-page-delay500';
+				outClass = 'pt-page-flipOutLeft';
+				break;
+			case 34:
+				inClass = 'pt-page-flipInBottom pt-page-delay500';
+				outClass = 'pt-page-flipOutTop';
+				break;
+			case 35:
+				inClass = 'pt-page-flipInTop pt-page-delay500';
+				outClass = 'pt-page-flipOutBottom';
+				break;
+			case 36:
+				inClass = 'pt-page-scaleUp';
+				outClass = 'pt-page-rotateFall pt-page-ontop';
+				break;
+			case 37:
+				inClass = 'pt-page-rotateInNewspaper pt-page-delay500';
+				outClass = 'pt-page-rotateOutNewspaper';
+				break;
+			case 38:
+				inClass = 'pt-page-moveFromRight';
+				outClass = 'pt-page-rotatePushLeft';
+				break;
+			case 39:
+				inClass = 'pt-page-moveFromLeft';
+				outClass = 'pt-page-rotatePushRight';
+				break;
+			case 40:
+				inClass = 'pt-page-moveFromBottom';
+				outClass = 'pt-page-rotatePushTop';
+				break;
+			case 41:
+				inClass = 'pt-page-moveFromTop';
+				outClass = 'pt-page-rotatePushBottom';
+				break;
+			case 42:
+				inClass = 'pt-page-rotatePullRight pt-page-delay180';
+				outClass = 'pt-page-rotatePushLeft';
+				break;
+			case 43:
+				inClass = 'pt-page-rotatePullLeft pt-page-delay180';
+				outClass = 'pt-page-rotatePushRight';
+				break;
+			case 44:
+				inClass = 'pt-page-rotatePullBottom pt-page-delay180';
+				outClass = 'pt-page-rotatePushTop';
+				break;
+			case 45:
+				inClass = 'pt-page-rotatePullTop pt-page-delay180';
+				outClass = 'pt-page-rotatePushBottom';
+				break;
+			case 46:
+				inClass = 'pt-page-moveFromRightFade';
+				outClass = 'pt-page-rotateFoldLeft';
+				break;
+			case 47:
+				inClass = 'pt-page-moveFromLeftFade';
+				outClass = 'pt-page-rotateFoldRight';
+				break;
+			case 48:
+				inClass = 'pt-page-moveFromBottomFade';
+				outClass = 'pt-page-rotateFoldTop';
+				break;
+			case 49:
+				inClass = 'pt-page-moveFromTopFade';
+				outClass = 'pt-page-rotateFoldBottom';
+				break;
+			case 50:
+				inClass = 'pt-page-rotateUnfoldLeft';
+				outClass = 'pt-page-moveToRightFade';
+				break;
+			case 51:
+				inClass = 'pt-page-rotateUnfoldRight';
+				outClass = 'pt-page-moveToLeftFade';
+				break;
+			case 52:
+				inClass = 'pt-page-rotateUnfoldTop';
+				outClass = 'pt-page-moveToBottomFade';
+				break;
+			case 53:
+				inClass = 'pt-page-rotateUnfoldBottom';
+				outClass = 'pt-page-moveToTopFade';
+				break;
+			case 54:
+				inClass = 'pt-page-rotateRoomLeftIn';
+				outClass = 'pt-page-rotateRoomLeftOut pt-page-ontop';
+				break;
+			case 55:
+				inClass = 'pt-page-rotateRoomRightIn';
+				outClass = 'pt-page-rotateRoomRightOut pt-page-ontop';
+				break;
+			case 56:
+				inClass = 'pt-page-rotateRoomTopIn';
+				outClass = 'pt-page-rotateRoomTopOut pt-page-ontop';
+				break;
+			case 57:
+				inClass = 'pt-page-rotateRoomBottomIn';
+				outClass = 'pt-page-rotateRoomBottomOut pt-page-ontop';
+				break;
+			case 58:
+				inClass = 'pt-page-rotateCubeLeftIn';
+				outClass = 'pt-page-rotateCubeLeftOut pt-page-ontop';
+				break;
+			case 59:
+				inClass = 'pt-page-rotateCubeRightIn';
+				outClass = 'pt-page-rotateCubeRightOut pt-page-ontop';
+				break;
+			case 60:
+				inClass = 'pt-page-rotateCubeTopIn';
+				outClass = 'pt-page-rotateCubeTopOut pt-page-ontop';
+				break;
+			case 61:
+				inClass = 'pt-page-rotateCubeBottomIn';
+				outClass = 'pt-page-rotateCubeBottomOut pt-page-ontop';
+				break;
+			case 62:
+				inClass = 'pt-page-rotateCarouselLeftIn';
+				outClass = 'pt-page-rotateCarouselLeftOut pt-page-ontop';
+				break;
+			case 63:
+				inClass = 'pt-page-rotateCarouselRightIn';
+				outClass = 'pt-page-rotateCarouselRightOut pt-page-ontop';
+				break;
+			case 64:
+				inClass = 'pt-page-rotateCarouselTopIn';
+				outClass = 'pt-page-rotateCarouselTopOut pt-page-ontop';
+				break;
+			case 65:
+				inClass = 'pt-page-rotateCarouselBottomIn';
+				outClass = 'pt-page-rotateCarouselBottomOut pt-page-ontop';
+				break;
+			case 66:
+				inClass = 'pt-page-rotateSidesIn pt-page-delay200';
+				outClass = 'pt-page-rotateSidesOut';
+				break;
+			case 67:
+				inClass = 'pt-page-rotateSlideIn';
+				outClass = 'pt-page-rotateSlideOut';
+				break;
+		}
 
-            // Current page to be removed.
-            var $currentPage = $pages.eq(currentPageIndex);
+		// This will get the pt-trigger elements parent wrapper div
+		var $pageWrapper = $pageTrigger.closest('.pt-wrapper');
+		var currentPageIndex = $pageWrapper.data('current'), tempPageIndex,
+			$pages = $pageWrapper.children('div.pt-page'),
+			pagesCount = $pages.length,
+			endCurrentPage = false,
+			endNextPage = false;
 
-            // Checking gotoPage value and decide what to do
-            // -1 Go to next page
-            // -2 Go to previous page
-            // 0+ Go to custom page number.
-            // NEXT PAGE
-            if (gotoPage == -1) {
+		gotoPage = parseInt($pageTrigger.data('goto'));
 
-                // Incrementing page counter to diplay next page
-                if(currentPageIndex < pagesCount - 1) {
-                    ++currentPageIndex;
-                }
-                else {
-                    currentPageIndex = 0;
-                }
-            }
-            // PREVOUS PAGE
-            else if (gotoPage == -2) {
-                if (currentPageIndex == 0){
-                    currentPageIndex = pagesCount - 1;
+		// check if 'data-goto' value is greater than total pages inside 'pt-wrapper'
+		if (!(pagesCount < gotoPage)) {
+			
+			tempPageIndex = currentPageIndex;
 
-                }
-                else if(currentPageIndex <= pagesCount - 1 ) {
-                    --currentPageIndex;
-                }
-                else {
-                    currentPageIndex = 0;
-                }
+			if($pageWrapper.data('isAnimating')) {
+				return false;
+			}
 
-            }
-            // GOTO PAGE
-            else {
-                currentPageIndex = gotoPage - 1 ;
-            }
+			// Setting the isAnimating property to true.
+			$pageWrapper.data('isAnimating', true);
 
-            // Check if the current page is same as the next page then do not do the animation
-            // else reset the 'isAnimatiing' flag
-            if (tempPageIndex != currentPageIndex) {
-                $pageWrapper.data('current', currentPageIndex);
+			// Current page to be removed.
+			var $currentPage = $pages.eq(currentPageIndex);
 
-                // Next page to be animated.
-                var $nextPage = $pages.eq(currentPageIndex).addClass('pt-page-current');
+			// Checking gotoPage value and decide what to do
+			// -1 Go to next page
+			// -2 Go to previous page
+			// 0+ Go to custom page number.
+			// NEXT PAGE
+			if (gotoPage == -1) {
 
-                $currentPage.addClass(outClass).on(animEndEventName, function() {
-                    $currentPage.off(animEndEventName);
-                    endCurrentPage = true;
-                    if(endNextPage) {
-                        onEndAnimation($pageWrapper, $nextPage, $currentPage);
-                    }
-                });
+				// Incrementing page counter to diplay next page
+				if(currentPageIndex < pagesCount - 1) {
+					++currentPageIndex;
+				}
+				else {
+					currentPageIndex = 0;
+				}
+			}
+			// PREVOUS PAGE
+			else if (gotoPage == -2) {
+				if (currentPageIndex == 0){
+					currentPageIndex = pagesCount - 1;
 
-                $nextPage.addClass(inClass).on(animEndEventName, function() {
-                    $nextPage.off(animEndEventName);
-                    endNextPage = true;
-                    if(endCurrentPage) {
-                        onEndAnimation($pageWrapper, $nextPage, $currentPage);
-                    }
-                });
+				}
+				else if(currentPageIndex <= pagesCount - 1 ) {
+					--currentPageIndex;
+				}
+				else {
+					currentPageIndex = 0;
+				}
 
-            }
-            else {
-                $pageWrapper.data('isAnimating', false);
-            }
+			}
+			// GOTO PAGE
+			else {
+				currentPageIndex = gotoPage - 1 ;
+			}
 
-        }
-        else {
-            alert("Transition.js : Invalid 'data-goto' attribute configuration.");
-        }
+			// Check if the current page is same as the next page then do not do the animation
+			// else reset the 'isAnimatiing' flag
+			if (tempPageIndex != currentPageIndex) {
+				$pageWrapper.data('current', currentPageIndex);
 
-        // Check if the animation is supported by browser and reset the pages.
-        if(!support) {
-            onEndAnimation($currentPage, $nextPage);
-        }
+				// Next page to be animated.
+				var $nextPage = $pages.eq(currentPageIndex).addClass('pt-page-current');
 
-        var prevPicture = currentPageIndex;
-        var nextPicture = currentPageIndex + 2;
+				$currentPage.addClass(outClass).on(animEndEventName, function() {
+					$currentPage.off(animEndEventName);
+					endCurrentPage = true;
+					if(endNextPage) {
+						onEndAnimation($pageWrapper, $nextPage, $currentPage);
+					}
+				});
 
-        if (nextPicture > pagesCount) {
-           var nextPicture = 1;
-        }
+				$nextPage.addClass(inClass).on(animEndEventName, function() {
+					$nextPage.off(animEndEventName);
+					endNextPage = true;
+					if(endCurrentPage) {
+						onEndAnimation($pageWrapper, $nextPage, $currentPage);
+					}
+				});
 
-        if (prevPicture == 0) {
-            var prevPicture = pagesCount;
-        }
+			}
+			else {
+				$pageWrapper.data('isAnimating', false);
+			}
 
-        setTimeout(function(){
-          $(".prevpreview").html('<img src="img/' + prevPicture + 'thumb.jpg">');
-            $(".nextpreview").html('<img src="img/' + nextPicture + 'thumb.jpg">');
-        }, 400);
+		}
+		else {
+			alert("Transition.js : Invalid 'data-goto' attribute configuration.");
+		}
 
-         $('.thumb').removeClass('active-thumb');
+		// Check if the animation is supported by browser and reset the pages.
+		if(!support) {
+			onEndAnimation($currentPage, $nextPage);
+		}
 
-        if (currentPageIndex > 0) {
-            var currentThumb = $('.thumb'+ currentPageIndex).attr('class').split(' ')[1];  
-            $('.' + currentThumb).next().addClass('active-thumb');
-        } else {
-            currentThumb = "thumb1";
-            $('.' + currentThumb).addClass('active-thumb');
-        }
-    }
+		var prevPicture = currentPageIndex;
+		var nextPicture = currentPageIndex + 2;
 
-    function onEndAnimation($pageWrapper, $nextPage, $currentPage) {
-        resetPage($nextPage, $currentPage);
-        $pageWrapper.data('isAnimating', false);
-    }
+		if (nextPicture > pagesCount) {
+		   var nextPicture = 1;
+		}
 
-    function resetPage($nextPage, $currentPage) {
-        $currentPage.attr('class', $currentPage.data('originalClassList'));
-        $nextPage.attr('class', $nextPage.data('originalClassList') + ' pt-page-current');
-    }
+		if (prevPicture == 0) {
+			var prevPicture = pagesCount;
+		}
 
-    return {
-        init : init,
-    };
+		setTimeout(function(){
+		  $(".prevpreview").html('<img src="img/' + prevPicture + 'thumb.jpg">');
+			$(".nextpreview").html('<img src="img/' + nextPicture + 'thumb.jpg">');
+		}, 1100);
+
+		 $('.thumb').removeClass('active-thumb');
+
+		if (currentPageIndex > 0) {
+			var currentThumb = $('.thumb'+ currentPageIndex).attr('class').split(' ')[1];  
+			$('.' + currentThumb).next().addClass('active-thumb');
+		} else {
+			currentThumb = "thumb1";
+			$('.' + currentThumb).addClass('active-thumb');
+		}
+
+		// check to see if there is a description, and if so, add arrow on button
+
+		var indexToPage = currentPageIndex + 1;
+
+		descriptionContent = $('.pt-page-' + indexToPage).children('.description').html();
+
+		if (typeof(descriptionContent) == "undefined") {
+			$('.has-description').removeClass('show');
+			$('.description-button').css('cursor', 'default');
+		} 
+		if (typeof(descriptionContent) != "undefined") {
+			$('.has-description').addClass('show');
+			$('.description-button').css('cursor', 'pointer');
+		}
+	}
+
+	function onEndAnimation($pageWrapper, $nextPage, $currentPage) {
+		resetPage($nextPage, $currentPage);
+		$pageWrapper.data('isAnimating', false);
+	}
+
+	function resetPage($nextPage, $currentPage) {
+		$currentPage.attr('class', $currentPage.data('originalClassList'));
+		$nextPage.attr('class', $nextPage.data('originalClassList') + ' pt-page-current');
+	}
+
+	return {
+		init : init,
+	};
 
 })();
 
 $(document).ready(function() {
-    // initializing page transition.
-    PageTransitions.init();
+	// initializing page transition.
+	PageTransitions.init();
+
+	$('.next, .prev').on('click', function(){
+		$('.description').removeClass('show-description');
+		$('.callout').removeClass('enter-text');
+		$('.description-text').removeClass('enter-text');
+	});
+
+	$('.description-button').on('click',function(){
+		$('.description').toggleClass('show-description');
+		$('.has-description').toggleClass('rotate');
+		setTimeout(function(){
+			$('.callout').toggleClass('enter-text','leave-text');
+		}, 300);
+		setTimeout(function(){
+			$('.description-text').toggleClass('enter-text','leave-text');
+		}, 500);
+	});
+
+	setTimeout(function(){
+  	$("body").removeClass('blur-and-scale');
+  	$('.next').addClass('next-move-in');
+		$('.prev').addClass('prev-move-in');
+	}, 50);
+
+	setTimeout(function(){
+		$('.description-button').addClass('move-up');
+	}, 500);
+
+	setTimeout(function(){
+				$('.button-text').addClass('move-up-text');
+	}, 550);
+
+	function checkMouseover() {
+		$('.next').mouseenter(function(){
+			$('.nextpreview').addClass('next-animation');
+		}).mouseleave(function(){
+			$('.nextpreview').removeClass('next-animation');
+		}).mousedown(function(){
+				setTimeout(function(){
+					$('.nextpreview').removeClass('next-animation');
+				},800)
+		});
+
+		$('.prev').mouseenter(function(){
+			$('.prevpreview').addClass('prev-animation');
+		}).mouseleave(function(){
+			$('.prevpreview').removeClass('prev-animation');
+		}).mousedown(function(){
+			setTimeout(function(){
+				$('.prevpreview').removeClass('prev-animation');
+			},800);
+		});
+	}
+
+		checkMouseover();
+
 });
